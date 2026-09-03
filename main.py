@@ -20,6 +20,9 @@ from models import (
     InterviewSession, InterviewExchange,
 )
 from auth import hash_password, verify_password, create_token, decode_token
+from email_utils import send_email
+import secrets
+import datetime
 from agents.job_agent import extract_and_save as save_job
 from agents.candidate_agent import extract_and_save as save_candidate
 from agents.matching_engine import match_job_to_candidate
@@ -98,13 +101,75 @@ def signup(req: SignupRequest):
         session.close()
         raise HTTPException(400, "Email already registered")
 
-    user = User(email=req.email, phone=req.phone, name=req.name, password_hash=hash_password(req.password))
+    verification_token = secrets.token_urlsafe(32)
+    user = User(email=req.email, phone=req.phone, name=req.name,
+                password_hash=hash_password(req.password), verification_token=verification_token)
     session.add(user)
     session.commit()
     user_id = user.id
     session.close()
 
+    send_email(req.email, "Verify your CareerPilot account",
+               f"Welcome to CareerPilot!\n\nVerify your email: {os.environ.get('APP_URL', 'http://localhost:8000')}/verify.html?token={verification_token}")
+
     return {"token": create_token(user_id), "name": req.name}
+
+
+@app.get("/api/verify-email")
+def verify_email(token: str):
+    session = get_session()
+    user = session.query(User).filter_by(verification_token=token).first()
+    if not user:
+        session.close()
+        raise HTTPException(400, "Invalid or expired verification link.")
+    user.email_verified = True
+    user.verification_token = None
+    session.commit()
+    session.close()
+    return {"status": "verified"}
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+@app.post("/api/forgot-password")
+def forgot_password(req: ForgotPasswordRequest):
+    session = get_session()
+    user = session.query(User).filter_by(email=req.email).first()
+    if user:
+        reset_token = secrets.token_urlsafe(32)
+        user.reset_token = reset_token
+        user.reset_token_expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        session.commit()
+        send_email(req.email, "Reset your CareerPilot password",
+                   f"Reset your password: {os.environ.get('APP_URL', 'http://localhost:8000')}/reset-password.html?token={reset_token}\n\nThis link expires in 1 hour.")
+    session.close()
+    # Always return the same response whether or not the email exists -
+    # prevents leaking which emails are registered.
+    return {"status": "if that email is registered, a reset link was sent"}
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+@app.post("/api/reset-password")
+def reset_password(req: ResetPasswordRequest):
+    session = get_session()
+    user = session.query(User).filter_by(reset_token=req.token).first()
+
+    if not user or not user.reset_token_expires or user.reset_token_expires < datetime.datetime.utcnow():
+        session.close()
+        raise HTTPException(400, "Invalid or expired reset link. Request a new one.")
+
+    user.password_hash = hash_password(req.new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    session.commit()
+    session.close()
+    return {"status": "password reset - log in with your new password"}
 
 
 @app.post("/api/login")

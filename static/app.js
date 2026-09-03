@@ -67,3 +67,20 @@ async function doSignup(e) {
   }
   return false;
 }
+
+async function doForgotPassword(e) {
+  e.preventDefault();
+  const email = prompt('Enter your email to receive a reset link:');
+  if (!email) return false;
+
+  const res = await fetch('/api/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  await res.json();
+  const errorEl = document.getElementById('error-msg');
+  errorEl.style.color = '#4ade80';
+  errorEl.textContent = 'If that email is registered, a reset link was sent.';
+  return false;
+}

@@ -31,6 +31,10 @@ class User(Base):
     phone = Column(String)
     password_hash = Column(String, nullable=False)
     name = Column(String)
+    email_verified = Column(Boolean, default=False)
+    verification_token = Column(String, nullable=True)
+    reset_token = Column(String, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

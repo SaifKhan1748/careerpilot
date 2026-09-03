@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Verify Email</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+  <div class="auth-card">
+    <div class="logo">CareerPilot</div>
+    <p class="tagline" id="msg">Verifying...</p>
+    <a href="/" class="primary-btn" style="display:block;text-align:center;text-decoration:none;margin-top:16px">Go to Login</a>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    fetch('/api/verify-email?token=' + encodeURIComponent(token))
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(() => { document.getElementById('msg').textContent = 'Email verified! You can now log in.'; })
+      .catch(() => { document.getElementById('msg').textContent = 'Invalid or expired verification link.'; });
+  </script>
+</body></html>
