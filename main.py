@@ -13,7 +13,7 @@ import io
 import os
 from pypdf import PdfReader
 
-from db import get_session
+from db import get_session, init_db
 from models import (
     User, Candidate, Job, Requirement, Match, ResumeVersion,
     AgentAssessment, JudgeDecision, Company, CompanyClaim,
@@ -39,6 +39,17 @@ from agents.voice_utils import transcribe_audio_file
 from agents.browser_agent import launch_browser_and_fill
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def create_tables_on_startup():
+    """
+    Creates any missing tables automatically. Safe to run on every
+    startup - it only creates tables that don't already exist, never
+    touches existing data. This means deployment never needs manual
+    Shell access (which isn't available on Render's free tier anyway).
+    """
+    init_db()
 
 
 @app.exception_handler(Exception)
