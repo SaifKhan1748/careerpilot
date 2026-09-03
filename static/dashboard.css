@@ -1,0 +1,170 @@
+.dashboard-body {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: 100vh;
+    overflow: auto;
+    height: auto;
+}
+
+.sidenav {
+    width: 220px;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.nav-item:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.nav-item.active {
+    background: var(--primary);
+    color: var(--bg);
+}
+
+.user-badge {
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 0 14px 8px;
+}
+
+.content {
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 900px;
+    z-index: 1;
+    overflow-y: auto;
+    max-height: 100vh;
+}
+
+.content h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: var(--text);
+}
+
+.tab-panel.hidden {
+    display: none;
+}
+
+.tab-panel input,
+.tab-panel textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.tab-panel input:focus,
+.tab-panel textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.secondary-btn {
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+}
+
+.secondary-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.tab-panel .primary-btn {
+    display: inline-block;
+    width: auto;
+    padding: 12px 20px;
+    margin-right: 8px;
+    margin-bottom: 12px;
+}
+
+.result-box {
+    margin-top: 16px;
+    padding: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    white-space: pre-wrap;
+    min-height: 20px;
+    color: var(--text);
+}
+
+.result-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.result-box th,
+.result-box td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+
+.result-box th {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.pass {
+        background: rgba(249, 116, 22, 0.174);
+        color: var(--accent);
+}
+
+.badge.fail {
+    background: rgba(161, 75, 75, 0.12);
+    color: var(--error);
+}
+
+select {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+}

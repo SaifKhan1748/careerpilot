@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CareerPilot Dashboard</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/dashboard.css">
+</head>
+<body class="dashboard-body">
+  <nav class="sidenav">
+    <div class="logo" style="text-align:left;margin-bottom:30px">CareerPilot</div>
+    <button class="nav-item active" data-tab="job">Job</button>
+    <button class="nav-item" data-tab="candidate">Candidate</button>
+    <button class="nav-item" data-tab="resume">Match & Resume</button>
+    <button class="nav-item" data-tab="assessments">Assessments</button>
+    <button class="nav-item" data-tab="gaps">Skill Gaps</button>
+    <button class="nav-item" data-tab="applications">Applications</button>
+    <button class="nav-item" data-tab="analytics">Analytics</button>
+    <button class="nav-item" data-tab="research">Company Research</button>
+    <button class="nav-item" data-tab="discover">Job Discovery</button>
+    <button class="nav-item" data-tab="interview">Interview</button>
+    <button class="nav-item" data-tab="browser">Browser Autofill</button>
+    <div style="flex:1"></div>
+    <div id="user-name" class="user-badge"></div>
+    <button class="nav-item" onclick="logout()">Log Out</button>
+  </nav>
+
+  <main class="content">
+
+    <section id="tab-job" class="tab-panel">
+      <h2>Job Intake</h2>
+      <input id="job-company" placeholder="Company name (optional)">
+      <input id="job-url" placeholder="Job URL (optional)">
+      <textarea id="job-text" placeholder="Paste job description" rows="8"></textarea>
+      <button class="primary-btn" onclick="submitJob()">Extract Job</button>
+      <div id="job-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-candidate" class="tab-panel hidden">
+      <h2>Candidate Profile</h2>
+      <input id="cand-name" placeholder="Full name">
+      <input id="cand-email" placeholder="Email">
+      <input id="cand-phone" placeholder="Phone">
+      <input id="cand-portfolio" placeholder="Portfolio URL">
+      <input id="cand-github" placeholder="GitHub URL">
+      <input id="cand-linkedin" placeholder="LinkedIn URL">
+      <label style="color:var(--text-muted);font-size:13px">Upload resume PDF (auto-fills text below) or paste text directly:</label>
+      <input type="file" id="cand-pdf" accept=".pdf" style="margin-bottom:12px">
+      <textarea id="cand-resume" placeholder="Paste resume text, or upload a PDF above" rows="8"></textarea>
+      <button class="primary-btn" onclick="submitCandidate()">Extract Candidate</button>
+      <div id="candidate-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-resume" class="tab-panel hidden">
+      <h2>Match & Resume</h2>
+      <button class="primary-btn" onclick="runMatch()">Run Matching Engine</button>
+      <button class="primary-btn" onclick="runLoop()">Run Generate → Critique → Optimize Loop</button>
+      <div id="loop-result" class="result-box"></div>
+      <button class="secondary-btn" onclick="loadResume()">Show Best Resume</button>
+      <div id="resume-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-assessments" class="tab-panel hidden">
+      <h2>Assessments</h2>
+      <button class="secondary-btn" onclick="runAssess('ats')">Run ATS</button>
+      <button class="secondary-btn" onclick="runAssess('recruiter')">Run Recruiter</button>
+      <button class="secondary-btn" onclick="runAssess('hiring')">Run Hiring Manager</button>
+      <button class="secondary-btn" onclick="runJudge()">Run Judge</button>
+      <button class="secondary-btn" onclick="runDebate()">Run Debate</button>
+      <button class="primary-btn" onclick="loadAssessments()">Refresh</button>
+      <div id="assessments-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-gaps" class="tab-panel hidden">
+      <h2>Skill Gaps</h2>
+      <button class="primary-btn" onclick="loadGaps()">Compute Gaps</button>
+      <div id="gaps-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-applications" class="tab-panel hidden">
+      <h2>Applications</h2>
+      <button class="primary-btn" onclick="logApplication()">Log Current Resume as Application</button>
+      <div id="applications-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-analytics" class="tab-panel hidden">
+      <h2>Outcome Analytics</h2>
+      <button class="primary-btn" onclick="loadAnalytics()">Refresh</button>
+      <div id="analytics-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-research" class="tab-panel hidden">
+      <h2>Company Research</h2>
+      <input id="research-company" placeholder="Company name">
+      <button class="primary-btn" onclick="runResearch()">Research</button>
+      <div id="research-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-discover" class="tab-panel hidden">
+      <h2>Job Discovery</h2>
+      <input id="discover-query" placeholder="e.g. Python backend developer remote">
+      <button class="primary-btn" onclick="runDiscover()">Search</button>
+      <div id="discover-result" class="result-box"></div>
+    </section>
+
+    <section id="tab-interview" class="tab-panel hidden">
+      <h2>Mock Interview</h2>
+      <button class="primary-btn" id="interview-start-btn" onclick="startInterview()">Start Interview</button>
+      <div id="interview-question-box" class="result-box hidden">
+        <p id="interview-category" style="color:var(--text-muted);font-size:12px;text-transform:uppercase"></p>
+        <p id="interview-question" style="font-size:16px;margin-bottom:14px"></p>
+        <textarea id="interview-answer" placeholder="Type your answer..." rows="4"></textarea>
+        <button class="primary-btn" onclick="submitInterviewAnswer()">Submit Answer</button>
+        <label style="display:block;margin-top:10px;color:var(--text-muted);font-size:13px">Or answer by voice:</label>
+        <input type="file" id="interview-voice" accept="audio/*">
+        <button class="secondary-btn" onclick="submitInterviewVoice()">Submit Voice Answer</button>
+      </div>
+      <div id="interview-feedback" class="result-box"></div>
+    </section>
+
+    <section id="tab-browser" class="tab-panel hidden">
+      <h2>Browser Autofill</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">
+        Opens a real Chrome window on this machine, fills known fields, and stops.
+        It will NEVER submit anything - review and close the window yourself.
+      </p>
+      <input id="browser-url" placeholder="Job application URL">
+      <button class="primary-btn" onclick="runBrowserAutofill()">Open & Autofill</button>
+      <div id="browser-result" class="result-box"></div>
+    </section>
+
+  </main>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>

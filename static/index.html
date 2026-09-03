@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CareerPilot</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="bg-shape"></div>
+  <div class="auth-card">
+    <div class="logo">CareerPilot</div>
+    <p class="tagline">Your AI-powered career copilot</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="showTab('login')">Log In</button>
+      <button class="tab" id="tab-signup" onclick="showTab('signup')">Sign Up</button>
+    </div>
+
+    <form id="login-form" onsubmit="return doLogin(event)">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Password" required>
+      <button type="submit" class="primary-btn">Log In</button>
+    </form>
+
+    <form id="signup-form" class="hidden" onsubmit="return doSignup(event)">
+      <input type="text" id="signup-name" placeholder="Full name" required>
+      <input type="email" id="signup-email" placeholder="Email" required>
+      <input type="tel" id="signup-phone" placeholder="Phone (optional)">
+      <input type="password" id="signup-password" placeholder="Password" required>
+      <button type="submit" class="primary-btn">Create Account</button>
+    </form>
+
+    <p class="error" id="error-msg"></p>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
