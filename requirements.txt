@@ -6,7 +6,6 @@ ddgs>=9.0
 pyttsx3>=2.90
 sounddevice>=0.4
 numpy>=1.24
-playwright>=1.40
 streamlit>=1.30
 fastapi>=0.110
 uvicorn>=0.27

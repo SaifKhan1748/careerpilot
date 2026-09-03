@@ -19,7 +19,6 @@
     <button class="nav-item" data-tab="research">Company Research</button>
     <button class="nav-item" data-tab="discover">Job Discovery</button>
     <button class="nav-item" data-tab="interview">Interview</button>
-    <button class="nav-item" data-tab="browser">Browser Autofill</button>
     <div style="flex:1"></div>
     <div id="user-name" class="user-badge"></div>
     <button class="nav-item" onclick="logout()">Log Out</button>
@@ -116,17 +115,6 @@
         <button class="secondary-btn" onclick="submitInterviewVoice()">Submit Voice Answer</button>
       </div>
       <div id="interview-feedback" class="result-box"></div>
-    </section>
-
-    <section id="tab-browser" class="tab-panel hidden">
-      <h2>Browser Autofill</h2>
-      <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">
-        Opens a real Chrome window on this machine, fills known fields, and stops.
-        It will NEVER submit anything - review and close the window yourself.
-      </p>
-      <input id="browser-url" placeholder="Job application URL">
-      <button class="primary-btn" onclick="runBrowserAutofill()">Open & Autofill</button>
-      <div id="browser-result" class="result-box"></div>
     </section>
 
   </main>

@@ -288,12 +288,6 @@ async function submitInterviewVoice() {
     showInterviewQuestion(data);
   } catch (e) { showError('interview-feedback', e); }
 }
-
-// ---- Browser autofill ----
-async function runBrowserAutofill() {
-  show('browser-result', 'Opening browser...');
-  try {
-    const data = await api('/api/browser/autofill', 'POST', { url: document.getElementById('browser-url').value });
-    show('browser-result', `Filled: ${data.filled_fields.join(', ') || 'none found'}<br>${data.note}`);
-  } catch (e) { showError('browser-result', e); }
-}
+// Browser Autofill intentionally removed from the web UI - it only
+// works running locally on a single machine (still available via
+// `python cli.py browser`). See main.py for the full explanation.

@@ -36,7 +36,6 @@ from agents.company_research_agent import research as research_company, link_com
 from agents.job_discovery_agent import discover
 from agents.interview_agent import generate_questions, evaluate_answer
 from agents.voice_utils import transcribe_audio_file
-from agents.browser_agent import launch_browser_and_fill
 
 app = FastAPI()
 
@@ -495,58 +494,11 @@ def api_interview_answer_voice(session_id: str, file: UploadFile = File(...), us
     return result
 
 
-# ---------------- Browser autofill ----------------
-
-class BrowserRequest(BaseModel):
-    url: str
-
-
-import threading
-
-
-@app.post("/api/browser/autofill")
-def api_browser_autofill(req: BrowserRequest, user: User = Depends(get_current_user)):
-    """
-    Launches a real Chrome window on THIS machine, fills known fields,
-    and returns immediately - it does NOT wait for you or auto-close.
-    Close the browser window yourself when you're done reviewing.
-    Never submits anything.
-
-    Playwright's SYNC API cannot run inside a thread that has any
-    asyncio event loop associated with it - FastAPI's own threadpool
-    can leave that association in place, which is exactly what causes
-    "Sync API inside the asyncio loop" errors. Running this in a raw
-    threading.Thread (not FastAPI's async threadpool) guarantees a
-    genuinely clean thread with zero asyncio ties.
-    """
-    candidate = get_user_candidate(user.id)
-    if not candidate:
-        raise HTTPException(400, "No candidate profile yet.")
-
-    result = {}
-
-    def _run():
-        try:
-            p, browser, page, filled = launch_browser_and_fill(req.url, candidate.id)
-            result["success"] = True
-            result["filled"] = filled
-        except Exception as e:
-            result["success"] = False
-            result["error"] = f"{type(e).__name__}: {e}"
-
-    thread = threading.Thread(target=_run)
-    thread.start()
-    thread.join()
-
-    if not result.get("success"):
-        raise HTTPException(500, f"Browser automation failed: {result.get('error')}")
-
-    filled = result["filled"]
-    note = "Browser window opened on this machine - review and close it yourself when done."
-    if not filled:
-        note += " If the page looked blank, this may be a bot-detection block on that site, not a bug."
-
-    return {"filled_fields": filled, "note": note}
+# Browser Autofill (backend endpoint) intentionally removed - it opens
+# a real Chrome window "on this machine," which only makes sense for a
+# single local user (still works via `python cli.py browser`). On a
+# deployed server, "this machine" is Render's headless container with
+# no display - the window would never be visible to any actual user.
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
