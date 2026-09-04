@@ -10,7 +10,7 @@
 .sidenav {
     width: 220px;
     background: var(--card-bg);
-    border-right: 1px solid var(--border);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
@@ -33,13 +33,13 @@
 }
 
 .nav-item:hover {
-    background: var(--bg);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text);
 }
 
 .nav-item.active {
     background: var(--primary);
-    color: var(--bg);
+    color: white;
 }
 
 .user-badge {
@@ -60,7 +60,6 @@
 .content h2 {
     margin-bottom: 20px;
     font-size: 22px;
-    color: var(--text);
 }
 
 .tab-panel.hidden {
@@ -72,8 +71,8 @@
     display: block;
     width: 100%;
     margin-bottom: 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     padding: 12px 14px;
     color: var(--text);
@@ -81,28 +80,16 @@
     font-family: inherit;
 }
 
-.tab-panel input:focus,
-.tab-panel textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-
 .secondary-btn {
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 10px 16px;
     font-size: 14px;
     cursor: pointer;
     margin-right: 8px;
     margin-bottom: 12px;
-    transition: border-color 0.15s;
-}
-
-.secondary-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary-dark);
 }
 
 .tab-panel .primary-btn {
@@ -116,13 +103,11 @@
 .result-box {
     margin-top: 16px;
     padding: 18px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 12px;
     font-size: 14px;
     white-space: pre-wrap;
     min-height: 20px;
-    color: var(--text);
 }
 
 .result-box table {
@@ -134,13 +119,8 @@
 .result-box td {
     text-align: left;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 13px;
-}
-
-.result-box th {
-    color: var(--text-muted);
-    font-weight: 600;
 }
 
 .badge {
@@ -152,19 +132,66 @@
 }
 
 .badge.pass {
-        background: rgba(249, 116, 22, 0.174);
-        color: var(--accent);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
 }
 
 .badge.fail {
-    background: rgba(161, 75, 75, 0.12);
+    background: rgba(248, 113, 113, 0.15);
     color: var(--error);
 }
 
 select {
-    background: var(--bg);
+    background: rgba(255, 255, 255, 0.06);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 6px;
     padding: 4px 8px;
+}
+
+/* Mobile: stack sidebar on top instead of side-by-side, full-width content */
+@media (max-width: 768px) {
+    .dashboard-body {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidenav {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 12px;
+        gap: 6px;
+    }
+
+    .sidenav .logo {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .nav-item {
+        flex: 1 1 auto;
+        text-align: center;
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .user-badge {
+        display: none;
+    }
+
+    .content {
+        max-width: 100%;
+        padding: 20px;
+        max-height: none;
+    }
+
+    .tab-panel input,
+    .tab-panel textarea {
+        font-size: 16px;
+    }
+
+    /* prevents iOS auto-zoom on focus */
 }
