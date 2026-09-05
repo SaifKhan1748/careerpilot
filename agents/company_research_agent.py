@@ -1,20 +1,22 @@
 """
-CareerPilot - Company Research Agent (Phase 5)
+CareerPilot - Company Research Agent (Phase 5, hardened)
 
 Searches the web for public information about a company, then asks the
 LLM to extract discrete factual claims - but every claim MUST cite a
 source_url that came from an ACTUAL search result. This is enforced in
 CODE: after the LLM responds, any claim citing a URL that wasn't in the
-real search results is thrown out, not trusted. This is what stops the
-system from inventing company facts with a fake-looking citation.
+real search results is thrown out, not trusted.
 
-Uses ddgs (DuckDuckGo search) - free, no API key needed, but does
-require real internet access. This agent cannot be tested from a
-network-restricted sandbox - only from your own machine.
+Uses ddgs (DuckDuckGo search) - free, no API key needed. NOTE: DDG's
+anti-scraping system sometimes resets connections from cloud/datacenter
+IPs (Render, Railway, AWS, etc.) - this is external and not something
+a code fix can fully guarantee against. Retries help with transient
+failures but can't beat a persistent IP-level block.
 """
 
 import os
 import json
+import time
 from groq import Groq
 from dotenv import load_dotenv
 from ddgs import DDGS
@@ -30,9 +32,10 @@ MODEL = "openai/gpt-oss-120b"
 
 def search_company(company_name: str, max_results_per_query: int = 5) -> list:
     """
-    Runs a few different search angles on the company. Returns a list
-    of {title, url, snippet} dicts - these are the ONLY sources the
-    LLM will be allowed to cite.
+    Runs a few different search angles on the company. Retries each
+    query up to 3 times on failure (handles transient connection
+    resets) and continues to the next query even if one fails entirely
+    after retries, rather than aborting the whole search.
     """
     queries = [
         f"{company_name} technology stack engineering",
@@ -43,29 +46,31 @@ def search_company(company_name: str, max_results_per_query: int = 5) -> list:
     results = []
     seen_urls = set()
 
-    with DDGS() as ddgs:
-        for query in queries:
-            for r in ddgs.text(query, max_results=max_results_per_query):
-                url = r.get("href") or r.get("url")
-                if not url or url in seen_urls:
-                    continue
-                seen_urls.add(url)
-                results.append({
-                    "title": r.get("title", ""),
-                    "url": url,
-                    "snippet": r.get("body", ""),
-                })
+    for query in queries:
+        for attempt in range(3):
+            try:
+                with DDGS() as ddgs:
+                    for r in ddgs.text(query, max_results=max_results_per_query):
+                        url = r.get("href") or r.get("url")
+                        if not url or url in seen_urls:
+                            continue
+                        seen_urls.add(url)
+                        results.append({
+                            "title": r.get("title", ""),
+                            "url": url,
+                            "snippet": r.get("body", ""),
+                        })
+                break  # this query succeeded, move to the next one
+            except Exception as e:
+                if attempt < 2:
+                    time.sleep(2)
+                else:
+                    print(f"Search failed for '{query}' after 3 attempts: {e}")
 
     return results
 
 
 def extract_claims_with_llm(company_name: str, search_results: list) -> list:
-    """
-    Asks the LLM to extract factual claims from the search results.
-    Every claim must cite one of the provided URLs - the prompt says
-    so, and research() double-checks this in code afterward, since
-    prompt instructions alone aren't enough to guarantee it.
-    """
     sources_text = json.dumps(search_results, indent=2)
 
     prompt = f"""Here are web search results about the company "{company_name}":
@@ -106,7 +111,6 @@ Rules:
 
 
 def link_company_to_job(job_id: str, company_id: str) -> None:
-    """Explicitly link a researched Company to a Job."""
     session = get_session()
     job = session.query(Job).filter_by(id=job_id).first()
     if job:
@@ -116,11 +120,6 @@ def link_company_to_job(job_id: str, company_id: str) -> None:
 
 
 def auto_link_matching_jobs(company_name: str, company_id: str) -> int:
-    """
-    After researching a company, link it to any existing Job whose
-    company_name matches (case-insensitive) and isn't linked yet.
-    Returns the number of jobs linked.
-    """
     session = get_session()
     jobs = session.query(Job).filter(Job.company_id.is_(None)).all()
 
@@ -139,14 +138,23 @@ def research(company_name: str) -> str:
     """
     Runs the full pipeline: search -> extract claims -> verify sources
     in code -> save Company + CompanyClaim rows. Returns company_id.
+    If search genuinely fails (e.g. DDG blocking this server's IP),
+    saves a Company row with confidence 0.0 rather than crashing -
+    honest about finding nothing instead of an unhandled error.
     """
-    search_results = search_company(company_name)
+    try:
+        search_results = search_company(company_name)
+    except Exception as e:
+        search_results = []
+        print(f"Search completely failed: {e}")
 
     if not search_results:
-        # save a Company row anyway, with zero confidence, rather than
-        # silently failing - honest about not finding anything
         session = get_session()
-        company = Company(name=company_name, research_summary="No search results found.", research_confidence=0.0)
+        company = Company(
+            name=company_name,
+            research_summary="No search results found - this may be a temporary block on web search from this server, not necessarily a real lack of information about the company. Try again in a few minutes.",
+            research_confidence=0.0,
+        )
         session.add(company)
         session.commit()
         company_id = company.id
@@ -158,9 +166,6 @@ def research(company_name: str) -> str:
 
     parsed = extract_claims_with_llm(company_name, search_results)
 
-    # CODE-ENFORCED CHECK: throw out any claim citing a URL that wasn't
-    # actually in the search results. This is the real safeguard - the
-    # prompt asking nicely is not sufficient on its own.
     verified_claims = []
     rejected_count = 0
     for claim in parsed.get("claims", []):
