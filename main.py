@@ -40,8 +40,11 @@ from agents.job_discovery_agent import discover
 from agents.interview_agent import generate_questions, evaluate_answer
 from agents.voice_utils import transcribe_audio_file
 
+from fastapi.middleware.gzip import GZipMiddleware
+
 app = FastAPI()
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 @app.on_event("startup")
 def create_tables_on_startup():
