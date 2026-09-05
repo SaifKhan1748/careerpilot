@@ -64,6 +64,11 @@ async def surface_real_errors(request: Request, exc: Exception):
     """
     return JSONResponse(status_code=500, content={"detail": f"{type(exc).__name__}: {exc}"})
 
+from fastapi.responses import FileResponse
+
+@app.exception_handler(404)
+async def custom_404(request, exc):
+    return FileResponse("static/404.html", status_code=404)
 
 class SignupRequest(BaseModel):
     email: str
